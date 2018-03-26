@@ -1,0 +1,56 @@
+info:
+  build:
+    artifact : @project.artifactId@
+    name : @project.name@
+    description : @project.description@
+    version : @project.version@
+spring:
+  profiles:
+    active: dev
+  application:
+    name: @project.description@
+
+logging:
+  name: shorturl
+  path: /tmp/logs/
+---
+#dev 环境
+spring:
+  profiles: dev
+  datasource:
+      url: jdbc:mysql://127.0.0.1:3306/shorturl?useUnicode=true&characterEncoding=utf-8&useSSL=false
+      username: short
+      password: shorturl
+      driver-class-name: com.mysql.jdbc.Driver
+  redis:
+    host: 127.0.0.1
+    port: 6379
+    database: 0
+    timeout: 3000
+    prefix: url
+    password: shorturl
+shorturl:
+  incrkey: surl_index
+  http_prefix: 127.0.0.1:8907/short/
+server:
+  tomcat:
+    max-threads: 100
+    min-spare-threads: 20
+  port: 8907
+  connection-timeout: 5000
+
+---
+#pub config
+mybatis:
+  mapper-locations: classpath:mapper/*Mapper.xml
+  config-location: classpath:mybatis/mybatis-config.xml
+  executor-type: simple
+  type-aliases-package: com.example.shorturl.entity
+
+#系统自带默认的tomcat,也可以使用jetty。需要配置jetty依赖。
+management:
+  security:
+    enabled: false
+
+spiderdt:
+  task-thread-nums: 32

@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.example.shorturl.dao.ShorturlMapper" >
+  <resultMap id="BaseResultMap" type="com.example.shorturl.entity.Shorturl" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="short_code" property="shortCode" jdbcType="VARCHAR" />
+    <result column="org_url" property="orgUrl" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="VARCHAR" />
+    <result column="update_time" property="updateTime" jdbcType="VARCHAR" />
+    <result column="click_times" property="clickTimes" jdbcType="BIGINT" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, short_code, org_url, create_time, update_time, click_times
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from shorturl
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <select id="selectBycode" resultMap="BaseResultMap" parameterType="String" >
+    select
+    <include refid="Base_Column_List" />
+    from shorturl
+    where BINARY short_code = #{shortCode,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from shorturl
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.example.shorturl.entity.Shorturl" >
+    insert into shorturl (id, short_code, org_url, 
+      create_time, update_time, click_times
+      )
+    values (#{id,jdbcType=INTEGER}, #{shortCode,jdbcType=VARCHAR}, #{orgUrl,jdbcType=VARCHAR}, 
+      #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}, #{clickTimes,jdbcType=BIGINT}
+      )
+  </insert>
+  <insert id="createUrlsInfo" parameterType="com.example.shorturl.entity.Shorturl" >
+    insert into shorturl (short_code, org_url,
+    create_time, update_time)
+    values ( #{shortCode,jdbcType=VARCHAR}, #{orgUrl,jdbcType=VARCHAR},date_format(now(),'%Y-%c-%d %h:%i:%s'),date_format(now(),'%Y-%c-%d %h:%i:%s') )
+  </insert>
+  <insert id="insertSelective" parameterType="com.example.shorturl.entity.Shorturl" >
+    insert into shorturl
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="shortCode != null" >
+        short_code,
+      </if>
+      <if test="orgUrl != null" >
+        org_url,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+      <if test="updateTime != null" >
+        update_time,
+      </if>
+      <if test="clickTimes != null" >
+        click_times,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="shortCode != null" >
+        #{shortCode,jdbcType=VARCHAR},
+      </if>
+      <if test="orgUrl != null" >
+        #{orgUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null" >
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="clickTimes != null" >
+        #{clickTimes,jdbcType=BIGINT},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.example.shorturl.entity.Shorturl" >
+    update shorturl
+    <set >
+      <if test="shortCode != null" >
+        short_code = #{shortCode,jdbcType=VARCHAR},
+      </if>
+      <if test="orgUrl != null" >
+        org_url = #{orgUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null" >
+        update_time = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="clickTimes != null" >
+        click_times = #{clickTimes,jdbcType=BIGINT},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.example.shorturl.entity.Shorturl" >
+    update shorturl
+    set short_code = #{shortCode,jdbcType=VARCHAR},
+      org_url = #{orgUrl,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      update_time = #{updateTime,jdbcType=TIMESTAMP},
+      click_times = #{clickTimes,jdbcType=BIGINT}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+  <update id="updateUrlStatus" >
+        update shorturl
+        set update_time =  date_format(now(),'%Y-%c-%d %h:%i:%s'),
+        click_times = click_times +1
+        where short_code = #{code};
+    </update>
+</mapper>
