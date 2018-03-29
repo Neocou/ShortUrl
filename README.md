@@ -29,7 +29,39 @@ A ShortUrl demo using spring boot
   输入地址栏：127.0.0.1:8907/short/X  <br>
   返回：{"code":0,"data":"baidu.com","status":200}<br>
 
+#  V2版本使用MD5编码，指定短链接6位长度
+基本思路：<br>
+        1、将长网址md5生成32位签名串,分为4段, 每段8个字节;<br>
+        2、任取一段，我这里使用随机选取，不过意义不大, 将他看成16进制串与0x3fffffff(30位1)与操作, 即超过30位的忽略处理;<br>
+        3、这30位分成6段, 把得到的值与 0x0000003D 进行位与运算，取得字符数组 chars 索引然后>>5位重复六次<br>
+        4、获得的6位字符串即为编码。<br>
+
+
+#  V2版本测试效果
+1、短链接查询<br>
+  127.0.0.1:8907/short/{短链接代码}<br>
+  输入地址栏：http://127.0.0.1:8907/short/NQ89vO  <br>
+  返回：{
+  "code": 0,
+  "data": "test.com",
+  "status": 200
+}<br>
+2、短链接生成<br>
+  127.0.0.1:8907/short/get/v2/长链接地址}<br>
+  输入地址栏：http://127.0.0.1:8907/short/get/baidu.com<br>
+  返回：{
+  "code": 0,
+  "data": {
+    "result": "true",
+    "url_short": "127.0.0.1:8907/short/8g9gJQ",
+    "url_long": "baidu.com",
+    "type": "0"
+  },
+  "status": 200
+}<br>
 
 # 注释
 
-下载测试请更改application里的配置参数，内附有sql数据库文件
+下载测试请更改application里的配置参数，内附有sql数据库文件<br>
+另如果使用MD5方式可以指定编码长度也不一定要6位，如果指定七位，就循环七次，>>位数减少就可以
+
