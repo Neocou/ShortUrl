@@ -1,8 +1,10 @@
 package com.example.shorturl.utils;
 
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.stereotype.Repository;
 
+import java.util.Random;
 import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -50,6 +52,21 @@ public class Utils {
 
     }
 
-
+    //MD5
+    public static String str2MD5(String url){
+        String md5 = DigestUtils.md5Hex(url);
+        StringBuilder result = new StringBuilder(6);
+        //这里将32位MD5分成四段，随机选取一段进行编码，当然不随机也行
+        Random r = new Random();
+        int i = r.nextInt(4);
+        //0x3fffffff取30位，超过的忽略
+        Long l = Long.valueOf(md5.substring(i*8,i*8+8),16)&0x3fffffff;
+        for(int j = 0;j<6;j++){
+            long index = l&0x0000003D;//0x0000003D对应十进制为61取字符组
+            result.append(h62Array[(int) index]);
+            l = l >> 5 ;//移动5位
+        }
+        return result.toString();
+    }
 
 }

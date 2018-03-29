@@ -44,5 +44,11 @@ public class UrlController {
         Map<String ,String> shortUrl = urlService.createShortUrl(orgurl);
         return ResponseEntity.ok(Utils.getRespons(shortUrl));
     }
+    @GetMapping("/get/v2/{orgurl}")
+    public ResponseEntity createV2Url(@PathVariable("orgurl")String orgurl) throws AppException{
+        slog.info("short url create begin:"+orgurl);
+        Map<String ,String> shortUrl = urlService.createV2ShortUrl(orgurl);
+        return ResponseEntity.ok(Utils.getRespons(shortUrl));
+    }
 
 }

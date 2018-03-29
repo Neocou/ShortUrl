@@ -69,17 +69,16 @@ public class UrlService {
             Long id = null;
             String oldCode = sredis.getString(orgurl);
             String code = "";
-            String urlDecode = URLDecoder.decode(orgurl);
-            if (Utils.checkHttpUrl(urlDecode) == false) {
-                slog.info("make short url input not http:" + urlDecode);
+            if (Utils.checkHttpUrl(orgurl) == false) {
+                slog.info("make short url input not http:" + orgurl);
                 item_map.put("url_short", "");
-                item_map.put("url_long", urlDecode);
+                item_map.put("url_long", orgurl);
                 item_map.put("type", "0");
                 item_map.put("result", "false");
             }
             if (oldCode != null) {
                 item_map.put("url_short", http_prefix + oldCode);
-                item_map.put("url_long", urlDecode);
+                item_map.put("url_long", orgurl);
                 item_map.put("type", "0");
                 item_map.put("result", "true");
                 slog.info(" get ret_maps from redis :" + item_map);
@@ -100,10 +99,54 @@ public class UrlService {
                 db_item.put("url_long", orgurl);
             }
             try {
-                sredis.addString("short:"+code, urlDecode, Constants.REDIS_URL_EXP);
+                sredis.addString("short:"+code, orgurl, Constants.REDIS_URL_EXP);
             } catch (Exception ee) {
                 slog.error("make shor url save to redis error:" + code + " url:" + orgurl);
             }
+        //save to mysql ansyc
+        TaskService.submit(() -> {
+            saveUrlInfoToDb(db_item);
+            return 0;
+        });
+        return item_map;
+    }
+
+
+    public Map<String,String> createV2ShortUrl(String orgurl) throws AppException{
+        slog.info("origin url_long is " + orgurl);
+        Map<String, String> item_map = Maps.newHashMap();
+        Map<String, String> db_item = Maps.newHashMap();
+        String oldCode = sredis.getString(orgurl);
+        String code = "";
+        if (Utils.checkHttpUrl(orgurl) == false) {
+            slog.info("make short url input not http:" + orgurl);
+            item_map.put("url_short", "");
+            item_map.put("url_long", orgurl);
+            item_map.put("type", "0");
+            item_map.put("result", "false");
+        }
+        if (oldCode != null) {
+            item_map.put("url_short", http_prefix + oldCode);
+            item_map.put("url_long", orgurl);
+            item_map.put("type", "0");
+            item_map.put("result", "true");
+            slog.info(" get ret_maps from redis :" + item_map);
+        } else {
+            code = Utils.str2MD5(orgurl);
+            slog.info("now url is " + orgurl + "      transform code is " + code);
+            item_map.put("url_short", http_prefix + code );
+            item_map.put("url_long", orgurl);
+            item_map.put("type", "0");
+            item_map.put("result", "true");
+
+            db_item.put("code", code);
+            db_item.put("url_long", orgurl);
+        }
+        try {
+            sredis.addString("short:"+code, orgurl, Constants.REDIS_URL_EXP);
+        } catch (Exception ee) {
+            slog.error("make shor url save to redis error:" + code + " url:" + orgurl);
+        }
         //save to mysql ansyc
         TaskService.submit(() -> {
             saveUrlInfoToDb(db_item);
